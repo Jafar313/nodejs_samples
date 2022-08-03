@@ -1,0 +1,11 @@
+{
+  "name": "cnpr-patterns",
+  "version": "1.0.0",
+  "description": "a sample package to get cnpr sms patterns",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Seyed Jafar Mousavi",
+  "license": "ISC"
+}
