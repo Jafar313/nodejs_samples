@@ -2,7 +2,6 @@ import express from 'express';
 import fs from 'fs';
 
 const app = express();
-const fileServer = fs();
 
 app.use(express.json());
 
@@ -13,6 +12,7 @@ app.get("/", (request, response) =>{
 });
 
 app.get("/people", (request, response) =>{
+    console.log('redirected to here')
     return response.send(GetPeople());
 });
 
@@ -53,19 +53,24 @@ function InsertPerson({name, age}) {
 }
 
 function GetPeople (){
-    if (people === []){
+    console.log('come into GetPeople method');
+    if (people == []){
+        console.log('people array is empty');
         const db = __dirname + '\\people.db' ;
         console.log('the directory is:' + db);
-        if (fileServer.exists(db, (db) =>{
-            fileServer.readFile(db, (err, result) =>{
+        if (fs.stat(db, (db) =>{
+            fs.readFile(db, (err, result) =>{
                 if (err != null){
                     return 404;
                 }
                 else{
-                    console.log(result);
+                    console.log(`the result of readFile module is: ${result}`);
                 }
             });
         }));
+    }
+    else{
+        console.log('people array is not empty');
     }
 }
 
