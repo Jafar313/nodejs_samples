@@ -1,31 +1,66 @@
 import express from 'express';
-import fs from 'fs';
+import {appendFile, open, read, readFile, writeFile} from 'fs';
+import path from 'path';
+import {fileURLToPath} from 'url';
+
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const dbPath = `${__dirname}/people.db`;
+const people = [];
 
 app.use(express.json());
-
-let people = [];
 
 app.get("/", (request, response) =>{
     return response.redirect("/people");
 });
 
-app.get("/people", (request, response) =>{
-    console.log('redirected to here')
-    return response.send(GetPeople());
-});
-
-app.post("/insert", (request, response) =>
+app.get("/people", (request, response) => {
+    readFile(dbPath, (err, data) =>{
+        if (err !== null){
+            return response.sendStatus(404);
+        } else{
+            console.log(`data receieved is: ${data}`);
+            return response.send(data);
+        }        
+    })
+})
+        
+app.post("/add-new-person", (request, response) =>
 {
     console.log(request.body);
-    let person = {name: request.body.name, age: request.body.age};
-    if (person.name !== undefined & person.age !== undefined){
+    let person = {FullName: request.body.name, Age: request.body.age};   
+    console.log("person array is: "+ JSON.stringify(person));
+    if (person.FullName !== undefined & person.Age !== undefined){
         console.log('person object is not null');
-        let id = InsertPerson(person);
-        console.log('person inserted');
-        console.log(`new person inserted is ${id, person.name, person.age}`);
-        return response.send(person);
+        readFile(dbPath, (err, data) => {
+            if (err != null){
+                console.log("cannot read db");
+                console.log(err);
+                 data = "{'people':[]}";
+                appendFile(dbPath, JSON.stringify(emptyData), () =>{
+                    console.log("new db generated and empty data inserted");
+                });
+            }
+            else {
+                console.log(`received data is: ${data}`)
+                people.push(JSON.parse(data));
+            }
+        });
+        open(dbPath, () => {
+            console.log("writing into db started...");
+            console.log("writing data is:" + JSON.stringify(people));
+            writeFile(dbPath, JSON.stringify(people), (err) => {
+                if (err != null){
+                    console.log(err);
+                }
+                else{
+                    console.log("person has been appended");
+                    return response.send(person);
+                }
+            });
+        });   
     }
     else{
         console.log('person object is null');
@@ -42,37 +77,4 @@ app.delete("/delete/:id", (request, response) =>{
 
 })
 
-function InsertPerson({name, age}) {
-    people = people.sort();
-    let newId = people[people.length - 1].id;
-    console.log(`the last id is: ${newId}`);
-    newId += 1;
-    let person = {id: newId, name, age};
-    people.push(person);
-    return newId;
-}
-
-function GetPeople (){
-    console.log('come into GetPeople method');
-    if (people == []){
-        console.log('people array is empty');
-        const db = __dirname + '\\people.db' ;
-        console.log('the directory is:' + db);
-        if (fs.stat(db, (db) =>{
-            fs.readFile(db, (err, result) =>{
-                if (err != null){
-                    return 404;
-                }
-                else{
-                    console.log(`the result of readFile module is: ${result}`);
-                }
-            });
-        }));
-    }
-    else{
-        console.log('people array is not empty');
-    }
-}
-
 app.listen(3000);
-
