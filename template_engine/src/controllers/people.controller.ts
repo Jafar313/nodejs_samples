@@ -4,9 +4,9 @@ import {Person} from "../interfaces/Person";
 
 const router = Router();
 
-router.get("/", async(req,res ) => {
+router.get("/", async(req,res) => {
     const people = await getPeople();
-    return res.send(people)
+    return res.send(people);
 })
 
 router.post("/", async(req, res) =>
