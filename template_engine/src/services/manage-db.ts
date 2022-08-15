@@ -15,7 +15,7 @@ async function getPeople() : Promise<Db>{
         try{
             console.log("want to read file from directory: ", dbPath);
             const result = await readFile(dbPath, {
-                flag:'string',
+                flag:'r',
                 encoding: 'utf8'
             });
             if (result){
