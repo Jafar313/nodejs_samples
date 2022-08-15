@@ -1,7 +1,5 @@
-export interface Db {
-    people: Person[]
-}
 export interface Person {
+    id: number,
     name: string,
     age: number
 }
