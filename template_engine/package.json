@@ -4,6 +4,7 @@
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
+    "prebuild": "cp -r ./src/views ./dist",
     "build": "tsc --watch",
     "start": "nodemon ./dist/index.js"
   },

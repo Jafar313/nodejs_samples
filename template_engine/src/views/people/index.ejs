@@ -1,0 +1,15 @@
+ <table>
+  <tr>
+    <th>id</th>
+    <th>name</th>
+    <th>age</th>
+  </tr>
+  <% people.forEach(function (person) { %>
+    <tr>
+      <td><%=person.id%></td>
+      <td><%=person.name%></td>
+      <td><%=person.age%></td>
+      <td><a href="<%=person.id%>">Show Details</a></td>
+    </tr>
+  <%});%>
+</table> 

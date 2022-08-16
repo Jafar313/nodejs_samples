@@ -1,12 +1,18 @@
 import {Router} from 'express'
-import {deletePerson, getPeople, insertPerson, updatePerson} from "../services/manage-db";
+import {deletePerson, getPeople, tryGetPerson, insertPerson, updatePerson} from "../services/manage-db";
 import {Person} from "../interfaces/Person";
 
 const router = Router();
 
 router.get("/", async(req,res) => {
-    const people = await getPeople();
-    return res.send(people);
+    const result = await getPeople();
+    return res.render('../views/people/index.ejs', {people: result.people});
+})
+
+router.get("/:id", async(req, res) =>{
+    let personId: number = Number(req.params.id);
+    const person = tryGetPerson(personId);
+    return res.render('../views/people/person-details.ejs', {person: person});
 })
 
 router.post("/", async(req, res) =>

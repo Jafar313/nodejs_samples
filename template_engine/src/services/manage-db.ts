@@ -2,7 +2,6 @@ import 'dotenv/config';
 import {appendFile, readFile, writeFile} from "fs/promises";
 import {Db} from '../interfaces/Db'
 import {Person} from '../interfaces/Person'
-import {PersonExists} from '../interfaces/PersonExists'
 import path from 'path';
 
 // @ts-ignore
@@ -42,10 +41,11 @@ async function insertPerson(person: Person): Promise<Person>{
 }
 
 async function updatePerson(person : Person) : Promise<(Person | undefined)>{
-    let personExists: PersonExists = personIsValid(person.id);
-    if (personExists.isExists){
-        db.people[personExists.index].name = person.name;
-        db.people[personExists.index].age = person.age;
+    let result = tryGetPerson(person.id);
+    if (result){
+        let index = db.people.indexOf(result)
+        db.people[index].name = person.name;
+        db.people[index].age = person.age;
         await SaveChanges();
         return person;
     }
@@ -53,15 +53,15 @@ async function updatePerson(person : Person) : Promise<(Person | undefined)>{
 }
 
 async function deletePerson(id: number) : Promise<(Person | undefined)>{
-    let personExists = personIsValid(id);
-    if (personExists.isExists){
-        let removedPerson : Person[] = db.people.splice(personExists.index, 1);
+    let person = tryGetPerson(id);
+    if (person){
+        let index = db.people.indexOf(person);
+        let removedPerson : Person[] = db.people.splice(index, 1);
         await SaveChanges();
         return removedPerson[0];
     }
     return undefined;
 }
-
 
 async function SaveChanges(){
     try{
@@ -72,12 +72,14 @@ async function SaveChanges(){
     }
 }
 
-function personIsValid(id: number): PersonExists{
-    let index = db.people.findIndex(x=> x.id === id);
+function tryGetPerson(personId: number): (Person | undefined){
+    let index = db.people.findIndex(p => p.id === personId);
+    console.log("index of people in array", index);
     if (index > -1){
-        return {isExists: true, index: index};
+        console.log("person found and want to return it");
+        return db.people[index];
     }
-    return {isExists: false, index: -1};
+    return undefined;
 }
 
-export{getPeople, insertPerson, updatePerson, deletePerson};
+export{getPeople, tryGetPerson, insertPerson, updatePerson, deletePerson};
