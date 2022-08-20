@@ -2,10 +2,11 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
+  Get, NotFoundException,
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { PersonService } from './person-service/person.service';
 import { Person } from './person.interface';
@@ -17,6 +18,10 @@ export class PeopleController {
   @Get()
   async getPeople(): Promise<Db> {
     return await this.personService.getPeople();
+  }
+
+  @Get(':id')
+  async gerPerson(@Param('id') id: number) {
   }
 
   @Post()
@@ -31,7 +36,10 @@ export class PeopleController {
 
   @Delete(':id')
   async removePerson(@Param('id') id) {
-    console.log('removing id is:', id);
-    return await this.personService.removePerson(id);
+    const result = await this.personService.removePerson(id);
+    if (!result) {
+      throw new NotFoundException();
+    }
+    return result;
   }
 }

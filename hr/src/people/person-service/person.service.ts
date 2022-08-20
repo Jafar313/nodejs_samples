@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { DbService } from '../db/db.service';
 import { Db } from '../db.interface';
@@ -30,7 +29,7 @@ export class PersonService {
       await this._dbService.saveChanges();
       return result;
     } else {
-      throw new BadRequestException(validation.error);
+      throw new BadRequestException(validation.error.message);
     }
   }
   async updatePerson(person: Person): Promise<Person | Joi.Err> {
@@ -41,15 +40,15 @@ export class PersonService {
         return person;
       }
     } else {
-      throw new BadRequestException(validation.error);
+      throw new BadRequestException(validation.error.message);
     }
   }
   async removePerson(id: number): Promise<Person | undefined> {
-    if (id > 0) {
-      const removedPerson: Person = this._dbService.deletePerson(id);
+    const removedPerson: Person = this._dbService.deletePerson(id);
+    console.log('result of removed person is:', removedPerson);
+    if (removedPerson) {
       await this._dbService.saveChanges();
-      return removedPerson;
     }
-    throw new NotFoundException();
+    return removedPerson;
   }
 }

@@ -3,10 +3,17 @@ import 'dotenv/config';
 import { appendFile, readFile, writeFile } from 'fs/promises';
 import { Db } from '../db.interface';
 import { Person } from '../person.interface';
+import * as path from 'path';
 
 @Injectable()
 export class DbService {
   private _db: Db = { people: [] };
+  private _dbPath = path.join(process.env.HOME, 'temp', process.env.DB_NAME);
+  constructor() {
+    this.initDb().then((r) =>
+      console.log('db initialized...', JSON.stringify(this._db.people)),
+    );
+  }
 
   public async getPeople(): Promise<Db> {
     if (this._db.people.length === 0) {
@@ -17,7 +24,7 @@ export class DbService {
 
   public async saveChanges(): Promise<boolean> {
     try {
-      await writeFile(process.env.DB_PATH, JSON.stringify(this._db));
+      await writeFile(this._dbPath, JSON.stringify(this._db));
       return true;
     } catch {
       return false;
@@ -43,19 +50,19 @@ export class DbService {
   deletePerson(id: number): Person {
     const index: number = this.findPersonIndex(id);
     if (index > -1) {
-      const removedPerson = this._db.people.slice(index, 1);
+      const removedPerson = this._db.people.splice(index, 1);
       return removedPerson[0];
     } else {
       return undefined;
     }
   }
   private findPersonIndex(id: number): number {
-    return this._db.people.findIndex((p) => p.id === id);
+    return this._db.people.findIndex((p) => p.id == id);
   }
   private async initDb(): Promise<void> {
     let dbFile: Db = { people: [] };
     try {
-      const result = await readFile(process.env.DB_PATH, {
+      const result = await readFile(this._dbPath, {
         encoding: 'utf-8',
       });
       dbFile = JSON.parse(result);
@@ -64,7 +71,7 @@ export class DbService {
       });
     } catch {
       console.log('some error occurred');
-      await appendFile(process.env.DB_PATH, JSON.stringify(dbFile));
+      await appendFile(this._dbPath, JSON.stringify(dbFile));
     }
   }
 }
