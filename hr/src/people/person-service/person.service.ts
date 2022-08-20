@@ -1,7 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DbService } from '../db/db.service';
 import { Db } from '../db.interface';
 import { Person } from '../person.interface';
+import * as Joi from 'joi';
+
+const personSchema = Joi.object<Person>({
+  id: Joi.number().min(1),
+  age: Joi.number().min(1).max(80),
+  name: Joi.string().min(3),
+});
 
 @Injectable()
 export class PersonService {
@@ -12,21 +23,26 @@ export class PersonService {
     return this._db;
   }
 
-  async insertPerson(person: Person): Promise<Person> {
-    if (this.personIsValid(person)) {
+  async insertPerson(person: Person): Promise<Person | string> {
+    const validation = personSchema.validate(person);
+    if (!validation.error) {
       const result = this._dbService.insertPerson(person);
       await this._dbService.saveChanges();
       return result;
+    } else {
+      throw new BadRequestException(validation.error);
     }
   }
-  async updatePerson(person: Person): Promise<Person | undefined> {
-    if (this.personIsValid(person)) {
+  async updatePerson(person: Person): Promise<Person | Joi.Err> {
+    const validation = personSchema.validate(person);
+    if (!validation.error) {
       if (this._dbService.updatePerson(person)) {
         await this._dbService.saveChanges();
         return person;
       }
+    } else {
+      throw new BadRequestException(validation.error);
     }
-    return undefined;
   }
   async removePerson(id: number): Promise<Person | undefined> {
     if (id > 0) {
@@ -34,12 +50,6 @@ export class PersonService {
       await this._dbService.saveChanges();
       return removedPerson;
     }
-    return undefined;
-  }
-
-  private personIsValid(person: Person): boolean {
-    if (person.age < 1 || person.age > 100) return false;
-    if (person.name.length < 3) return false;
-    return true;
+    throw new NotFoundException();
   }
 }

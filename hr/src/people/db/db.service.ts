@@ -26,7 +26,6 @@ export class DbService {
 
   insertPerson(person: Person): Person {
     person.id = Math.floor(Math.random() * 1000 + 1);
-    person.age = Math.floor(Math.random() * 80 + 1);
     this._db.people.push(person);
     return person;
   }
@@ -54,7 +53,7 @@ export class DbService {
     return this._db.people.findIndex((p) => p.id === id);
   }
   private async initDb(): Promise<void> {
-    let dbFile: Db;
+    let dbFile: Db = { people: [] };
     try {
       const result = await readFile(process.env.DB_PATH, {
         encoding: 'utf-8',

@@ -5,7 +5,7 @@ import {
   Get,
   Param,
   Post,
-  Put, Query,
+  Put,
 } from '@nestjs/common';
 import { PersonService } from './person-service/person.service';
 import { Person } from './person.interface';
