@@ -1,6 +1,7 @@
 import "reflect-metadata"
 import { DataSource } from "typeorm"
-import { User } from "./entity/User"
+import { Person } from "./entity/Person"
+import { PersonHolder } from "./entity/PersonHolder"
 
 export const AppDataSource = new DataSource({
     type: "mssql",
@@ -10,7 +11,7 @@ export const AppDataSource = new DataSource({
     database: "tempdb",
     synchronize: true,
     logging: false,
-    entities: [User],
+    entities: [PersonHolder, Person],
     migrations: [],
     subscribers: [],
 })
